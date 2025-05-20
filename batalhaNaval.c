@@ -1,67 +1,61 @@
 #include <stdio.h>
 
-#define TAMANHO_TABULEIRO 10
-#define TAMANHO_NAVIO 3
+#define TAM 10          // Tamanho do tabuleiro
+#define TAM_NAVIO 3     // Tamanho fixo dos navios
 #define AGUA 0
 #define NAVIO 3
 
+// Função para verificar se há espaço e se não há sobreposição
+int pode_posicionar(int tabuleiro[TAM][TAM], int linha, int coluna, int dx, int dy) {
+    for (int i = 0; i < TAM_NAVIO; i++) {
+        int l = linha + i * dx;
+        int c = coluna + i * dy;
+        if (l < 0 || l >= TAM || c < 0 || c >= TAM || tabuleiro[l][c] != AGUA) {
+            return 0; // Fora dos limites ou sobreposição
+        }
+    }
+    return 1; // Pode posicionar
+}
+
+// Função para posicionar o navio no tabuleiro
+void posicionar_navio(int tabuleiro[TAM][TAM], int linha, int coluna, int dx, int dy) {
+    for (int i = 0; i < TAM_NAVIO; i++) {
+        int l = linha + i * dx;
+        int c = coluna + i * dy;
+        tabuleiro[l][c] = NAVIO;
+    }
+}
+
 int main() {
-    // Declaração do tabuleiro e inicialização com água (0)
-    int tabuleiro[TAMANHO_TABULEIRO][TAMANHO_TABULEIRO] = {0};
+    int tabuleiro[TAM][TAM] = {0}; // Inicializa tudo com água (0)
 
-    // Coordenadas iniciais dos navios (linha e coluna)
-    int linhaNavioH = 2, colunaNavioH = 1; // Navio horizontal
-    int linhaNavioV = 5, colunaNavioV = 4; // Navio vertical
+    // Define os navios: linha, coluna, dx, dy
+    int navios[4][4] = {
+        {1, 1, 0, 1},  // Horizontal
+        {3, 4, 1, 0},  // Vertical
+        {0, 0, 1, 1},  // Diagonal principal
+        {0, 9, 1, -1}  // Diagonal secundária
+    };
 
-    // Verificação se o navio horizontal cabe no tabuleiro
-    if (colunaNavioH + TAMANHO_NAVIO <= TAMANHO_TABULEIRO) {
-        // Verificação de sobreposição antes de posicionar o navio horizontal
-        int sobreposicao = 0;
-        for (int i = 0; i < TAMANHO_NAVIO; i++) {
-            if (tabuleiro[linhaNavioH][colunaNavioH + i] != AGUA) {
-                sobreposicao = 1;
-                break;
-            }
-        }
+    // Tenta posicionar cada navio
+    for (int i = 0; i < 4; i++) {
+        int linha = navios[i][0];
+        int coluna = navios[i][1];
+        int dx = navios[i][2];
+        int dy = navios[i][3];
 
-        if (!sobreposicao) {
-            for (int i = 0; i < TAMANHO_NAVIO; i++) {
-                tabuleiro[linhaNavioH][colunaNavioH + i] = NAVIO;
-            }
+        if (pode_posicionar(tabuleiro, linha, coluna, dx, dy)) {
+            posicionar_navio(tabuleiro, linha, coluna, dx, dy);
         } else {
-            printf("Erro: Sobreposicao detectada no navio horizontal.\n");
+            printf("Erro ao posicionar navio %d: posicao invalida ou sobreposicao.\n", i + 1);
         }
-    } else {
-        printf("Erro: Navio horizontal fora dos limites do tabuleiro.\n");
     }
 
-    // Verificação se o navio vertical cabe no tabuleiro
-    if (linhaNavioV + TAMANHO_NAVIO <= TAMANHO_TABULEIRO) {
-        // Verificação de sobreposição antes de posicionar o navio vertical
-        int sobreposicao = 0;
-        for (int i = 0; i < TAMANHO_NAVIO; i++) {
-            if (tabuleiro[linhaNavioV + i][colunaNavioV] != AGUA) {
-                sobreposicao = 1;
-                break;
-            }
-        }
-
-        if (!sobreposicao) {
-            for (int i = 0; i < TAMANHO_NAVIO; i++) {
-                tabuleiro[linhaNavioV + i][colunaNavioV] = NAVIO;
-            }
-        } else {
-            printf("Erro: Sobreposicao detectada no navio vertical.\n");
-        }
-    } else {
-        printf("Erro: Navio vertical fora dos limites do tabuleiro.\n");
-    }
-
-    // Exibição do tabuleiro
+    // Exibe o tabuleiro
     printf("\nTabuleiro:\n");
-    for (int linha = 0; linha < TAMANHO_TABULEIRO; linha++) {
-        for (int coluna = 0; coluna < TAMANHO_TABULEIRO; coluna++) {
-            printf("%d ", tabuleiro[linha][coluna]);
+    for (int i = 0; i < TAM; i++) {
+        for (int j = 0; j < TAM; j++) {
+            printf("%d ", tabuleiro[i][j]);
         }
         printf("\n");
     }
